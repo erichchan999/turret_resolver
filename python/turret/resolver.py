@@ -219,7 +219,15 @@ def uri_to_filepath(uri):
     if len(publishes) == 0:
         return ZMQ_NULL_RESULT
 
-    publishes.sort()
+    # Sort publishes by creation time
+    try:
+        publishTimes = [os.path.getmtime(publish) for publish in publishes]
+        zippedTimes = list(zip(publishes, publishTimes))
+        zippedTimes.sort(key=lambda x: x[1])
+        publishes = [item[0] for item in zippedTimes]
+    except: # Fallback if getmtime fails
+        # print("Error getting modification times for publishes.")
+        publishes.sort()        
 
     if VERBOSE:
         print("turret_resolver found publishes: %s\n" % publishes)
